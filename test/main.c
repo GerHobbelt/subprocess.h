@@ -772,7 +772,7 @@ UTEST(environment, illegal_inherit_environment) {
 
   ASSERT_NE(0, subprocess_create_ex(commandLine,
                                     subprocess_option_inherit_environment,
-                                    environment, &process));
+                                    environment, 0, &process));
 }
 
 UTEST(environment, illegal_empty_environment_with_inherit_environment) {
@@ -782,7 +782,7 @@ UTEST(environment, illegal_empty_environment_with_inherit_environment) {
 
   ASSERT_NE(0, subprocess_create_ex(commandLine,
                                     subprocess_option_inherit_environment,
-                                    environment, &process));
+                                    environment, 0, &process));
 }
 
 UTEST(environment, null_environment_with_inherit_environment) {
@@ -790,7 +790,7 @@ UTEST(environment, null_environment_with_inherit_environment) {
   struct subprocess_s process;
 
   ASSERT_EQ(0, subprocess_create_ex(commandLine,
-                                    subprocess_option_inherit_environment, 0,
+                                    subprocess_option_inherit_environment, 0, 0,
                                     &process));
 
   ASSERT_EQ(0, subprocess_destroy(&process));
@@ -802,7 +802,7 @@ UTEST(environment, specify_environment) {
   struct subprocess_s process;
   int ret = -1;
 
-  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, &process));
+  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, 0, &process));
 
   ASSERT_EQ(0, subprocess_join(&process, &ret));
 
@@ -818,7 +818,7 @@ UTEST(executable_resolve, no_slashes_with_environment) {
   struct subprocess_s process;
   int ret = -1;
 
-  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, &process));
+  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, 0, &process));
 
   ASSERT_EQ(0, subprocess_join(&process, &ret));
 
@@ -833,7 +833,7 @@ UTEST(executable_resolve, no_slashes_with_inherit) {
   int ret = -1;
 
   ASSERT_EQ(0, subprocess_create_ex(commandLine,
-                                    subprocess_option_inherit_environment, 0,
+                                    subprocess_option_inherit_environment, 0, 0,
                                     &process));
 
   ASSERT_EQ(0, subprocess_join(&process, &ret));
@@ -855,7 +855,7 @@ UTEST(executable_resolve, custom_search_path) {
   snprintf(path_var, sizeof(path_var), "PATH=%s", current_path);
   environment[0] = path_var;
 
-  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, &process));
+  ASSERT_EQ(0, subprocess_create_ex(commandLine, 0, environment, 0, &process));
 
   ASSERT_EQ(0, subprocess_join(&process, &ret));
 

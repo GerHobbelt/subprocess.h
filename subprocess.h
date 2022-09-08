@@ -105,6 +105,8 @@ subprocess_weak int subprocess_create(const char *const command_line[],
 /// @param environment An optional array of strings for the environment to use
 /// for a child process (each element of the form FOO=BAR). The last element
 /// must be NULL to signify the end of the array.
+/// @param cwd An optional directory that will become the newly created process
+/// working directory
 /// @param out_process The newly created process.
 /// @return On success zero is returned.
 ///
@@ -113,6 +115,7 @@ subprocess_weak int subprocess_create(const char *const command_line[],
 subprocess_weak int
 subprocess_create_ex(const char *const command_line[], int options,
                      const char *const environment[],
+                     const char *const cwd,
                      struct subprocess_s *const out_process);
 
 /// @brief Get the standard input file for a process.
@@ -447,11 +450,12 @@ int subprocess_create_named_pipe_helper(void **rd, void **wr) {
 int subprocess_create(const char *const commandLine[], int options,
                       struct subprocess_s *const out_process) {
   return subprocess_create_ex(commandLine, options, SUBPROCESS_NULL,
-                              out_process);
+                              SUBPROCESS_NULL, out_process);
 }
 
 int subprocess_create_ex(const char *const commandLine[], int options,
                          const char *const environment[],
+                         const char *const cwd,
                          struct subprocess_s *const out_process) {
 #if defined(_MSC_VER)
   int fd;
@@ -706,7 +710,7 @@ int subprocess_create_ex(const char *const commandLine[], int options,
           1,                   // handles are inherited
           flags,               // creation flags
           used_environment,    // used environment
-          SUBPROCESS_NULL,     // use parent's current directory
+          cwd,                 // current working directory
           SUBPROCESS_PTR_CAST(LPSTARTUPINFOA,
                               &startInfo), // STARTUPINFO pointer
           SUBPROCESS_PTR_CAST(LPPROCESS_INFORMATION, &processInfo))) {
@@ -801,6 +805,14 @@ int subprocess_create_ex(const char *const commandLine[], int options,
   if (0 != posix_spawn_file_actions_addclose(&actions, stdoutfd[0])) {
     posix_spawn_file_actions_destroy(&actions);
     return -1;
+  }
+
+  // If requested, change spawned process current working directory
+  if (cwd) {
+     if (0 != posix_spawn_file_actions_addchdir_np(&actions, cwd)) {
+       posix_spawn_file_actions_destroy(&actions);
+       return -1;
+     }
   }
 
   // Map the write end to stdout

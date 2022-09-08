@@ -24,13 +24,20 @@
 // For more information, please refer to <http://unlicense.org/>
 
 #include <subprocess.h>
+#include <direct.h>
 
 int main(int argc, const char *const argv[]) {
   const char *const commandLine[] = {"process_return_argc", "onearg", 0};
   struct subprocess_s process;
   int ret = -1;
-
+  #if defined(_MSC_VER)
+    #pragma warning(push, 1)
+    #pragma warning(disable : 4996)
+  #endif
   if (0 != chdir("/")) {
+  #if defined(_MSC_VER)
+    #pragma warning(pop)
+  #endif
     return 1;
   }
 
