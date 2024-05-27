@@ -24,7 +24,13 @@
 // For more information, please refer to <http://unlicense.org/>
 
 #include <subprocess.h>
+
+#if defined(_MSC_VER)
 #include <direct.h>
+#define chdir(x) _chdir(x)
+#elif defined(__MINGW32__)
+#include <unistd.h>  // chdir
+#endif
 
 int main(int argc, const char *const argv[]) {
   const char *const commandLine[] = {"process_return_argc", "onearg", 0};
